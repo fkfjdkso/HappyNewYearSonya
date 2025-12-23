@@ -1,8 +1,8 @@
-name: Deploy React/Vite to Pages
+name: Deploy Figma Export to Pages
 
 on:
   push:
-    branches: ["main"] # Убедитесь, что ветка называется main
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -10,12 +10,8 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,28 +20,20 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: 20
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install  # Устанавливаем пакеты, которые скачал Figma-плагин
 
-      - name: Build project
-        run: npm run build
+      - name: Build
+        run: npm run build # Создаем папку dist с готовым сайтом
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # VITE обычно собирает всё в папку 'dist'.
-          # Если у вас Create React App, замените 'dist' на 'build'
-          path: './dist'
+          path: './dist' # Figma/Vite всегда собирает в dist
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
