@@ -58,9 +58,10 @@ export default function App() {
               className="fixed inset-0 z-50 flex items-center justify-center bg-black"
             >
               <video
-                src="./video.mp4" // Убедитесь, что файл лежит в папке public
+               src={`${import.meta.env.BASE_URL}video.mp4`} // Это автоматически подставит правильный путь репозитория
                 autoPlay
                 playsInline
+                muted // Добавьте это для теста! Браузеры часто блокируют видео со звуком
                 onEnded={handleVideoComplete}
                 className="w-full h-full object-contain"
               />
