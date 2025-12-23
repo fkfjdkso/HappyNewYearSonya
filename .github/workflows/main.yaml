@@ -1,43 +1,51 @@
-name: Deploy static content to Pages
+name: Deploy React/Vite to Pages
 
 on:
-  # Запуск при пуше в ветку main (проверьте, что ваша ветка называется main, а не master)
   push:
-    branches: ["main"]
-
-  # Позволяет запускать воркфлоу вручную из вкладки Actions
+    branches: ["main"] # Убедитесь, что ветка называется main
   workflow_dispatch:
 
-# Устанавливаем права GITHUB_TOKEN для деплоя
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Разрешаем только один деплой за раз
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # ВАЖНО: '.' означает корень репозитория.
-          # Если ваш index.html лежит в папке (например, 'src' или 'public'), замените '.' на './src'
-          path: '.'
+          # VITE обычно собирает всё в папку 'dist'.
+          # Если у вас Create React App, замените 'dist' на 'build'
+          path: './dist'
 
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
