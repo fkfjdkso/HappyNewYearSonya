@@ -12,6 +12,9 @@ permissions:
 
 jobs:
   build_and_deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,18 +24,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          # Убрали строку cache: 'npm', чтобы он не искал lock-файл
 
       - name: Install dependencies
-        run: npm install  # Устанавливаем пакеты, которые скачал Figma-плагин
+        run: npm install
 
       - name: Build
-        run: npm run build # Создаем папку dist с готовым сайтом
+        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # Figma/Vite всегда собирает в dist
+          path: './dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
